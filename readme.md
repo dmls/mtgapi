@@ -20,3 +20,7 @@ To set up MTG API, follow these steps:
 ## Getting Started
 To get started with MTG API, follow these steps:
 
+1. **Import Card Data**: Import card data from the official API to the database by running `src/importer.py`. Make sure to update the database connection details in the importer script before running it.
+
+```bash
+python src/importer.py
