@@ -71,7 +71,7 @@ class User:
         except Exception as e:
             return e
 
-    def decode_auth_token(self, token):
+    def validate_auth_token(self, token):
         try:
             payload = jwt.decode(token, os.environ.get('AUTH_TOKEN_SECRET'))
             return payload['sub']
