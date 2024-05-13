@@ -6,8 +6,7 @@ from functools import wraps
 import json
 import os
 
-from db_manager import DBManager
-from user import User
+from mtgapi import DBManager, User
 
 load_dotenv()
 

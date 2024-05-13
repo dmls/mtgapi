@@ -1,6 +1,6 @@
 from mtgsdk import Card
 from pprint import pprint
-from db_manager import DBManager
+from mtgapi.db_manager import DBManager
 
 class Importer:
     def __init__(self, dbm):
