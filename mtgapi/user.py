@@ -11,7 +11,7 @@ class User:
         load_dotenv()
 
     def get_user(self, email):
-        collection = self.dbm.db['users']
+        collection = self.dbm.db.users
         return collection.find_one({'email': email})
 
     def hash_password(self, pwd):
@@ -39,7 +39,7 @@ class User:
         if user:
             return False
 
-        collection = self.dbm.db['users']
+        collection = self.dbm.db.users
 
         result = collection.insert_one({
             'email': email,

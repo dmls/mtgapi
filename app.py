@@ -55,7 +55,7 @@ def validate_token(func):
 @app.route('/mtgapi/v1.0/cards', methods = ['GET'])
 @validate_token
 def get_cards():
-    col = dbm.db['cards']
+    col = dbm.db.cards
     return bson_jsonify(col.find_one())
 
 if __name__ == '__main__':
