@@ -10,7 +10,7 @@ class Importer:
         cards = Card.all()
         for card in cards:
             data = vars(card)
-            collection = self.dbm.db['cards']
+            collection = self.dbm.db.cards
             result = collection.insert_one(data)
             pprint(result)
 
