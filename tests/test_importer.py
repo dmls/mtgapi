@@ -16,7 +16,10 @@ def test_import_cards(mock_dbm, monkeypatch):
 
     # Simulate Card.all() returning a list of mock cards.
     sample_cards = [sample_card]
-    monkeypatch.setattr('mtgapi.importer.Card', Mock(all = Mock(return_value = sample_cards)))
+    monkeypatch.setattr(
+        'mtgapi.importer.Card',
+        Mock(all = Mock(return_value = sample_cards))
+    )
     importer.dbm.Card.all = Mock(return_value = sample_cards)
 
     importer.import_cards()
