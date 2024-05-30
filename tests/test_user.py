@@ -11,7 +11,7 @@ load_dotenv()
 
 @pytest.mark.parametrize('mock_dbm', ['users'], indirect = True)
 
-def test_hash_password(mock_dbm, monkeypatch):
+def test_hash_password(mock_dbm):
     user = User(mock_dbm)
 
     password = 'password'
