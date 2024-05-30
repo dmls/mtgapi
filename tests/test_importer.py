@@ -2,14 +2,9 @@ import pytest
 from unittest.mock import Mock
 
 from mtgapi import Importer, sample_card
+from tests import mock_dbm
 
-@pytest.fixture
-def mock_dbm():
-    dbm = Mock()
-    dbm.db = Mock()
-    dbm.db.cards = Mock()
-
-    return dbm
+@pytest.mark.parametrize('mock_dbm', ['cards'], indirect = True)
 
 def test_import_cards(mock_dbm, monkeypatch):
     importer = Importer(mock_dbm)
