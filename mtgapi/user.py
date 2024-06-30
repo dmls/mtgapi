@@ -58,8 +58,9 @@ class User:
 
         try:
             payload = {
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes = 30),
-                'iat': datetime.datetime.utcnow(),
+                'exp': datetime.datetime.now(datetime.UTC) +
+                        datetime.timedelta(minutes = 30),
+                'iat': datetime.datetime.now(datetime.UTC),
                 'sub': email
             }
 
