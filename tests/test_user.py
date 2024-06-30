@@ -1,5 +1,7 @@
 import bcrypt
+import datetime
 from dotenv import load_dotenv
+import jwt
 import os
 import pytest
 from unittest.mock import Mock, MagicMock
@@ -63,3 +65,28 @@ class TestUser:
         })
 
         assert result == collection.insert_one.return_value
+
+    def test_gen_auth_token(self, mock_dbm, monkeypatch):
+        user = User(mock_dbm)
+        collection = MagicMock()
+
+        monkeypatch.setattr(user, 'validate_password', lambda email, pwd: False)
+        assert user.gen_auth_token(self.email, self.password) is False
+
+
+        monkeypatch.setattr(user, 'validate_password', lambda email, pwd: True)
+
+        payload = {
+            'exp': datetime.datetime.now(datetime.UTC) +
+                    datetime.timedelta(minutes = 30),
+            'iat': datetime.datetime.now(datetime.UTC),
+            'sub': self.email
+        }
+
+        test_token = jwt.encode(
+            payload,
+            os.environ.get('AUTH_TOKEN_SECRET'),
+            algorithm = 'HS256'
+        )
+
+        assert test_token == user.gen_auth_token(self.email, self.password)
