@@ -4,8 +4,7 @@ import json
 import os
 import secrets
 
-from db_manager import DBManager
-from user import User
+from mtgapi import DBManager, User
 
 def create_config_file():
     # Define path to the .env file

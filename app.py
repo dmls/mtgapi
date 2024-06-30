@@ -6,8 +6,7 @@ from functools import wraps
 import json
 import os
 
-from db_manager import DBManager
-from user import User
+from mtgapi import DBManager, User
 
 load_dotenv()
 
@@ -56,7 +55,7 @@ def validate_token(func):
 @app.route('/mtgapi/v1.0/cards', methods = ['GET'])
 @validate_token
 def get_cards():
-    col = dbm.db['cards']
+    col = dbm.db.cards
     return bson_jsonify(col.find_one())
 
 if __name__ == '__main__':
