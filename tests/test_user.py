@@ -68,7 +68,6 @@ class TestUser:
 
     def test_gen_auth_token(self, mock_dbm, monkeypatch):
         user = User(mock_dbm)
-        collection = MagicMock()
 
         monkeypatch.setattr(user, 'validate_password', lambda email, pwd: False)
         assert user.gen_auth_token(self.email, self.password) is False
@@ -76,6 +75,30 @@ class TestUser:
 
         monkeypatch.setattr(user, 'validate_password', lambda email, pwd: True)
 
+        test_token = user.create_auth_token(self.email)
+        assert test_token == user.gen_auth_token(self.email, self.password)
+
+    def test_validate_auth_token(self, mock_dbm, monkeypatch):
+        user = User(mock_dbm)
+
+        monkeypatch.setattr(user, 'validate_password', lambda email, pwd: True)
+
+        # Valid
+        test_token = user.create_auth_token(self.email)
+        assert user.validate_auth_token(test_token) == self.email
+
+        # Expired
+        payload = {
+            'exp': datetime.datetime.now(datetime.UTC) -
+                    datetime.timedelta(minutes = 30),
+            'iat': datetime.datetime.now(datetime.UTC),
+            'sub': self.email
+        }
+
+        test_token = user.create_auth_token(self.email, payload)
+        assert user.validate_auth_token(test_token) == user.auth_token_msg_expired
+
+        # Invalid
         payload = {
             'exp': datetime.datetime.now(datetime.UTC) +
                     datetime.timedelta(minutes = 30),
@@ -83,10 +106,5 @@ class TestUser:
             'sub': self.email
         }
 
-        test_token = jwt.encode(
-            payload,
-            os.environ.get('AUTH_TOKEN_SECRET'),
-            algorithm = 'HS256'
-        )
-
-        assert test_token == user.gen_auth_token(self.email, self.password)
+        test_token = user.create_auth_token(self.email, payload, 'BAD_SECRET')
+        assert user.validate_auth_token(test_token) == user.auth_token_msg_invalid
