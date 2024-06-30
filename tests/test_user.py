@@ -2,7 +2,7 @@ import bcrypt
 from dotenv import load_dotenv
 import os
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 
 from mtgapi import User
 from tests import mock_dbm
@@ -12,16 +12,12 @@ load_dotenv()
 @pytest.mark.parametrize('mock_dbm', ['users'], indirect = True)
 class TestUser:
     @pytest.fixture(autouse = True)
-    def setup(self):
+    def setup(self, mock_dbm):
         self.email = 'user@example.com'
         self.password = 'password'
-        self.expected_password_hash = self.get_password_hash(self.password).decode('utf-8')
 
-    def get_password_hash(self, password):
-        return bcrypt.hashpw(
-            password.encode('utf-8'),
-            os.environ.get('PASSWORD_SALT').encode('utf-8')
-        )
+        user = User(mock_dbm)
+        self.expected_password_hash = user.hash_password(self.password).decode('utf-8')
 
     def get_password_hash(self, password):
         return bcrypt.hashpw(
@@ -51,3 +47,19 @@ class TestUser:
 
         monkeypatch.setattr(user, 'get_user', lambda email: None)
         assert user.validate_password(self.email, self.password) is False
+
+    def test_create(self, mock_dbm, monkeypatch):
+        user = User(mock_dbm)
+        collection = MagicMock()
+        monkeypatch.setattr(user.dbm.db, 'users', collection)
+
+        # Test valid email & password
+        monkeypatch.setattr(user, 'get_user', lambda email: None)
+
+        result = user.create(self.email, self.password)
+        collection.insert_one.assert_called_once_with({
+            'email': self.email,
+            'password': user.hash_password('password')
+        })
+
+        assert result == collection.insert_one.return_value
