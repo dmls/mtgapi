@@ -1,0 +1,24 @@
+name: Python application
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set CI environment variables
+        run: echo "CI_BUILD=true" >> $GITHUB_ENV
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.12
+      - name: Install pipenv
+        run: pip install pipenv
+      - name: Install dependencies
+        run: pipenv install --dev
+      - name: Run setup
+        run: pipenv run python setup.py
+      - name: Run tests
+        run: pipenv run pytest

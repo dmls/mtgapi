@@ -8,10 +8,14 @@ class User:
     def __init__(self, dbm):
         self.dbm = dbm
 
+        self.auth_token_algo = 'HS256'
+        self.auth_token_msg_expired = 'Signature expired. Please re-authenticate.'
+        self.auth_token_msg_invalid = 'Invalid token. Please re-authenticate.'
+
         load_dotenv()
 
     def get_user(self, email):
-        collection = self.dbm.db['users']
+        collection = self.dbm.db.users
         return collection.find_one({'email': email})
 
     def hash_password(self, pwd):
@@ -39,7 +43,7 @@ class User:
         if user:
             return False
 
-        collection = self.dbm.db['users']
+        collection = self.dbm.db.users
 
         result = collection.insert_one({
             'email': email,
@@ -47,6 +51,25 @@ class User:
         })
 
         return result
+
+    def create_auth_token(self, email, payload = None, secret = None):
+        payload = payload if payload != None else {
+            'exp': datetime.datetime.now(datetime.UTC) +
+                    datetime.timedelta(minutes = 30),
+            'iat': datetime.datetime.now(datetime.UTC),
+            'sub': email
+        }
+
+        secret = secret if secret else os.environ.get('AUTH_TOKEN_SECRET')
+
+        try:
+            return jwt.encode(
+                payload,
+                secret,
+                algorithm = self.auth_token_algo
+            )
+        except Exception as e:
+            return e
 
     def gen_auth_token(self, email, pwd):
         if not email or not pwd:
@@ -56,30 +79,22 @@ class User:
         if not pass_valid:
             return False
 
-        try:
-            payload = {
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes = 30),
-                'iat': datetime.datetime.utcnow(),
-                'sub': email
-            }
-
-            return jwt.encode(
-                payload,
-                os.environ.get('AUTH_TOKEN_SECRET'),
-                algorithm = 'HS256'
-            )
-        except Exception as e:
-            return e
+        return self.create_auth_token(email)
 
     def validate_auth_token(self, token):
         try:
-            payload = jwt.decode(token, os.environ.get('AUTH_TOKEN_SECRET'))
+            payload = jwt.decode(
+                token,
+                os.environ.get('AUTH_TOKEN_SECRET'),
+                self.auth_token_algo
+            )
+
             return payload['sub']
 
         except jwt.ExpiredSignatureError:
-            return 'Signature expired. Please re-authenticate.'
+            return self.auth_token_msg_expired
 
         except jwt.InvalidTokenError:
-            return 'Invalid token. Please re-authenticate.'
+            return self.auth_token_msg_invalid
 
         return False

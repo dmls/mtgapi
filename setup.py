@@ -4,8 +4,7 @@ import json
 import os
 import secrets
 
-from db_manager import DBManager
-from user import User
+from mtgapi import DBManager, User
 
 def create_config_file():
     # Define path to the .env file
@@ -52,7 +51,9 @@ def main():
     dbm = DBManager()
 
     create_config_file()
-    create_user(dbm)
+
+    if not os.getenv('CI_BUILD', 'false').lower() == 'true':
+        create_user(dbm)
 
     print('Setup complete.')
 
