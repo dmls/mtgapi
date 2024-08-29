@@ -51,7 +51,9 @@ def main():
     dbm = DBManager()
 
     create_config_file()
-    create_user(dbm)
+
+    if not os.getenv('CI_BUILD', 'false').lower() == 'true':
+        create_user(dbm)
 
     print('Setup complete.')
 
