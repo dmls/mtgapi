@@ -14,9 +14,10 @@ jobs:
           python-version: 3.12
       - name: Install pipenv
         run: pip install pipenv
+      - name: Install dependencies
+        run: pipenv install --dev
       - name: Run setup
         run: python setup.py
       - name: Run tests
         run: |
-          pipenv install --dev
           pipenv run pytest
