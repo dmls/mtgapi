@@ -24,3 +24,14 @@ To get started with MTG API, follow these steps:
 
 ```bash
 python src/importer.py
+```
+
+## Testing
+
+Tests are automatically run on Github when a PR is created or updated. 
+
+To run them manually:
+```bash
+pipenv run pytest
+```
+
